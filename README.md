@@ -1,7 +1,5 @@
 # 원티드 프리온보딩 프론트엔드 챌린지 9월: TypeScript
 
-> https://yujinwon-dev.github.io/wanted-pre-onboarding-challenge-fe-2/
-
 ## 사전 과제 요구사항
 
 - [x] 필요한 데이터를 모두 모델링한다.
