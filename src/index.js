@@ -29,6 +29,9 @@ class TodoList {
    */
   getTodoById(id) {
     const targetTodo = this.todos.find((todo) => todo.id === id);
+    if (!targetTodo) {
+      throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
+    }
     return targetTodo;
   }
 
@@ -42,8 +45,6 @@ class TodoList {
    */
   createTodo({ content, isCompleted, category, tags = [] }) {
     let newTodo = {
-      // Date로 id 설정 시 연속된 create 호출에서 id가 같은 todo가 생김
-      // id: Date.now().toString(),
       id: uuidv4(),
       content,
       isCompleted,
@@ -60,6 +61,9 @@ class TodoList {
    * @param {Object<Todo>} updateTodoProps
    */
   updateTodo(targetTodo) {
+    if (!this.todos.find((todo) => todo.id === targetTodo.id)) {
+      throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
+    }
     const newTodos = this.todos.map((todo) => {
       if (todo.id === targetTodo.id) {
         const newTodo = { ...todo, ...targetTodo };
@@ -79,6 +83,9 @@ class TodoList {
     if (id.length === 0) {
       this.todos = [];
       return;
+    }
+    if (!this.todos.find((todo) => todo.id === targetTodo.id)) {
+      throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
     }
     const newTodos = this.todos.filter((todo) => todo.id !== id);
     this.todos = newTodos;
@@ -103,13 +110,11 @@ class TodoList {
       });
       this.todos = newTodos;
     } else {
+      if (!this.todos.find((todo) => todo.id === id)) {
+        throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
+      }
       const newTodos = this.todos.map((todo) => {
         if (todo.id === id) {
-          // 아래 방법으로는 동일한 객체를 가리키므로 제대로 동작하지 않음
-          // const newTodoTags = todo.tags;
-          // newTodoTags.filter((tag) => {
-          //   return tag !== tagName;
-          // });
           const newTodo = {
             ...todo,
             tags: todo.tags.filter((tag) => tag !== tagName),
@@ -137,6 +142,8 @@ myTodos.createTodo({
   category: "공부",
   tags: ["ts"],
 });
+
+// const todo = myTodos.getTodoById("hello");
 
 const todos = myTodos.getTodos();
 console.log(todos);
