@@ -50,7 +50,7 @@ class TodoList {
    * @returns {Todo} - todo 객체
    */
   getTodoById(id: string): Todo {
-    const targetTodo = this.todos.find((todo: Todo) => todo.id === id);
+    const targetTodo = this.todos.find((todo) => todo.id === id);
     if (!targetTodo) {
       throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
     }
@@ -141,11 +141,11 @@ class TodoList {
       }
       const newTodos = this.todos.map((todo) => {
         if (todo.id === id) {
-          const newTodo = {
+          const todoWithoutTags = {
             ...todo,
             tags: todo.tags?.filter((tag) => tag !== tagName),
           };
-          return newTodo;
+          return todoWithoutTags;
         } else {
           return todo;
         }
