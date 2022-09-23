@@ -9,7 +9,29 @@ import { v4 as uuidv4 } from "uuid";
  * @property {Array.<string>} [tags] - 태그들
  */
 
+interface Todo {
+  id: string;
+  content: string;
+  isCompleted: boolean;
+  category: string;
+  tags?: string[];
+}
+
+interface CreateTodoProps {
+  content: string;
+  isCompleted: boolean;
+  category: string;
+  tags?: string[];
+}
+
+interface DeleteTagProps {
+  id: string;
+  tagName?: string;
+}
+
 class TodoList {
+  todos: Todo[];
+
   constructor() {
     this.todos = [];
   }
@@ -18,7 +40,7 @@ class TodoList {
    * 모든 할 일을 조회하는 함수
    * @returns {Array.<Todo>} - todo 객체의 배열
    */
-  getTodos() {
+  getTodos(): Todo[] {
     return this.todos;
   }
 
@@ -27,7 +49,7 @@ class TodoList {
    * @param {string} id - 아이디
    * @returns {Todo} - todo 객체
    */
-  getTodoById(id) {
+  getTodoById(id: string): Todo {
     const targetTodo = this.todos.find((todo) => todo.id === id);
     if (!targetTodo) {
       throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
@@ -43,15 +65,15 @@ class TodoList {
    * @param {string} createTodoProps.category - 카테고리
    * @param {Array.<string>} [createTodoProps.tags] - 태그들
    */
-  createTodo({ content, isCompleted, category, tags = [] }) {
-    let newTodo = {
+  createTodo({ content, isCompleted, category, tags = [] }: CreateTodoProps) {
+    let newTodo: Todo = {
       id: uuidv4(),
       content,
       isCompleted,
       category,
     };
     if (tags.length) {
-      newTodo.tags = tags;
+      newTodo["tags"] = tags;
     }
     this.todos.push(newTodo);
   }
@@ -60,14 +82,13 @@ class TodoList {
    * 특정 할 일의 속성을 수정하는 함수
    * @param {Object<Todo>} updateTodoProps
    */
-  updateTodo(targetTodo) {
+  updateTodo(targetTodo: Todo) {
     if (!this.todos.find((todo) => todo.id === targetTodo.id)) {
       throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
     }
     const newTodos = this.todos.map((todo) => {
       if (todo.id === targetTodo.id) {
-        const newTodo = { ...todo, ...targetTodo };
-        return newTodo;
+        return targetTodo;
       } else {
         return todo;
       }
@@ -84,7 +105,7 @@ class TodoList {
       this.todos = [];
       return;
     }
-    if (!this.todos.find((todo) => todo.id === targetTodo.id)) {
+    if (!this.todos.find((todo) => todo.id === id)) {
       throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
     }
     const newTodos = this.todos.filter((todo) => todo.id !== id);
@@ -97,29 +118,34 @@ class TodoList {
    * @param {string} deleteTodoProps.id - 아이디
    * @param {string} [deleteTodoProps.tagName] - 태그 이름
    */
-  deleteTodoTags({ id, tagName = "" }) {
+  deleteTodoTags({ id, tagName = "" }: DeleteTagProps) {
     if (tagName.length === 0) {
       const newTodos = this.todos.map((todo) => {
         if (todo.id === id) {
-          const { tags, ...todoWithoutTags } = todo;
-          const newTodo = { ...todoWithoutTags };
-          return newTodo;
+          const { tags, ...keysWithoutTags } = todo;
+          const todoWithoutTags = { ...keysWithoutTags };
+          return todoWithoutTags;
         } else {
           return todo;
         }
       });
       this.todos = newTodos;
     } else {
-      if (!this.todos.find((todo) => todo.id === id)) {
+      const targetTodo = this.todos.find((todo) => todo.id === id);
+      if (!targetTodo) {
         throw Error("해당 id를 가진 할 일이 존재하지 않습니다.");
+      }
+      const targetTag = targetTodo.tags?.find((tag) => tag === tagName);
+      if (!targetTag) {
+        throw Error("해당하는 태그가 존재하지 않습니다.");
       }
       const newTodos = this.todos.map((todo) => {
         if (todo.id === id) {
-          const newTodo = {
+          const todoWithoutTags = {
             ...todo,
-            tags: todo.tags.filter((tag) => tag !== tagName),
+            tags: todo.tags?.filter((tag) => tag !== tagName),
           };
-          return newTodo;
+          return todoWithoutTags;
         } else {
           return todo;
         }
@@ -140,7 +166,7 @@ myTodos.createTodo({
   content: "typescript 공부",
   isCompleted: false,
   category: "공부",
-  tags: ["ts"],
+  tags: ["js"],
 });
 
 // const todo = myTodos.getTodoById("hello");
@@ -149,16 +175,18 @@ const todos = myTodos.getTodos();
 console.log(todos);
 
 const targetTodo = todos.find((todo) => todo.content === "typescript 공부");
-myTodos.updateTodo({
-  id: targetTodo.id,
-  isCompleted: true,
-  category: "운동",
-});
-console.log(myTodos);
+if (targetTodo) {
+  myTodos.updateTodo({
+    ...targetTodo,
+    isCompleted: true,
+    category: "운동",
+  });
+  console.log(myTodos);
 
-myTodos.deleteTodoTags({ id: targetTodo.id });
-// myTodos.deleteTodoTags({ id: targetTodo.id, tagName: "ts" });
-console.log(myTodos);
+  // myTodos.deleteTodoTags({ id: targetTodo.id });
+  myTodos.deleteTodoTags({ id: targetTodo.id, tagName: "ts" });
+  console.log(myTodos);
+}
 
 // myTodos.deleteTodo(targetTodo.id);
 // console.log(myTodos);
